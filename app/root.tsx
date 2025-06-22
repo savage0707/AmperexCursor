@@ -105,6 +105,7 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
       cache: storefront.CacheLong(),
       variables: {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
+        allCategoriesMenuHandle: 'all-categories', // The handle for your new menu
       },
     }),
     // Add other queries here, so that they are loaded in parallel

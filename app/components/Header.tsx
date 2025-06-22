@@ -5,7 +5,7 @@ import {
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
+import type {HeaderQuery, CartApiQueryFragment, MenuItemFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 
 interface HeaderProps {
@@ -23,7 +23,7 @@ export function Header({
   cart,
   publicStoreDomain,
 }: HeaderProps) {
-  const {shop, menu, collections} = header;
+  const {shop, menu, collections, allCategoriesMenu} = header;
   return (
     <>
       <TopBar />
@@ -37,16 +37,16 @@ export function Header({
       <nav className="navigation-bar">
         <div className="mega-menu-container">
           <NavLink to="/collections/all" className="all-categories-button">
-            All Categories
+            ALL CATEGORIES
           </NavLink>
           <div className="mega-menu-panel">
             <div className="mega-menu-collection-list">
-              {collections?.nodes.map((collection) => (
+              {allCategoriesMenu?.items.map((item) => (
                 <NavLink
-                  to={`/collections/${collection.handle}`}
-                  key={collection.id}
+                  to={item.url || ''}
+                  key={item.id}
                 >
-                  {collection.title}
+                  {item.title}
                 </NavLink>
               ))}
             </div>

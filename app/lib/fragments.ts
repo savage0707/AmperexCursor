@@ -208,11 +208,15 @@ export const HEADER_QUERY = `#graphql
     $country: CountryCode
     $headerMenuHandle: String!
     $language: LanguageCode
+    $allCategoriesMenuHandle: String!
   ) @inContext(language: $language, country: $country) {
     shop {
       ...Shop
     }
     menu(handle: $headerMenuHandle) {
+      ...Menu
+    }
+    allCategoriesMenu: menu(handle: $allCategoriesMenuHandle) {
       ...Menu
     }
     collections(first: 10) {

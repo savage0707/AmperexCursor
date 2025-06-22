@@ -202,7 +202,13 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .header-search-form button {
-  display: none; /* Hiding the text button */
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 /* Style for the main nav bar */
@@ -529,22 +535,32 @@ button.reset:hover:not(:has(> *)) {
 */
 .mega-menu-container {
   position: relative;
+  display: inline-block;
 }
 
 .mega-menu-panel {
   display: none;
   position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: white;
-  border: 1px solid #e0e0e0;
-  padding: 20px;
+  background-color: #f9f9f9;
   min-width: 200px;
-  z-index: 1000;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 5px;
 }
 
 .mega-menu-container:hover .mega-menu-panel {
   display: block;
+}
+
+.mega-menu-collection-list a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.mega-menu-collection-list a:hover {
+  background-color: #f1f1f1;
 }
 
 /*
@@ -628,24 +644,23 @@ button.reset:hover:not(:has(> *)) {
   Top Bar Styles
 */
 .top-bar {
-  background-color: #1a2a44;
-  color: #fff;
+  background-color: #f8f8f8;
+  padding: 0.5rem 5%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 8px 5%;
   font-size: 0.8rem;
+  color: #555;
 }
 
-.top-bar-right {
+.top-bar-left, .top-bar-right {
   display: flex;
+  gap: 15px;
   align-items: center;
-  gap: 20px;
 }
 
 .top-bar-right a {
-  color: #fff;
   text-decoration: none;
+  color: #555;
 }
 
 .top-bar-right a:hover {
@@ -659,37 +674,22 @@ button.reset:hover:not(:has(> *)) {
   background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
   padding: 0 5%;
-  display: flex;
-  align-items: center;
 }
 
 .all-categories-button {
   background-color: #f5a623;
-  color: #000;
-  font-weight: bold;
-  padding: 15px 30px;
-  display: block;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
   text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
 }
 
 .all-categories-button:hover {
   background-color: #f7b94e;
 }
 
-.mega-menu-collection-list a {
-  display: block;
-  padding: 10px 20px;
-  text-decoration: none;
-  color: #333;
-}
-
-.mega-menu-collection-list a:hover {
-  background-color: #f2f2f2;
-}
-
-/*
-  Category Carousel Styles
-*/
 .category-carousel {
   padding: 2rem 0;
   margin: 0 5%;
