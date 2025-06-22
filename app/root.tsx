@@ -100,6 +100,7 @@ export async function loader(args: LoaderFunctionArgs) {
  */
 async function loadCriticalData({context}: LoaderFunctionArgs) {
   const {storefront} = context;
+  const allCategoriesMenuId = 'gid://shopify/Menu/375715463470';
 
   try {
     console.log('Loading basic header data...');
@@ -110,7 +111,8 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
         cache: storefront.CacheLong(),
         variables: {
           headerMenuHandle: 'main-menu',
-          allCategoriesMenuId: 'gid://shopify/Menu/375715463470',
+          allCategoriesMenuId,
+          hasAllCategoriesMenuId: true,
         },
       }),
     ]);
@@ -128,7 +130,8 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
           cache: storefront.CacheLong(),
           variables: {
             headerMenuHandle: 'main-menu',
-            allCategoriesMenuId: null, // Don't include the menu
+            allCategoriesMenuId: '', // Pass an empty string for the ID
+            hasAllCategoriesMenuId: false, // Set the boolean to false
           },
         }),
       ]);
