@@ -1,5 +1,8 @@
-import {data as remixData, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import { Form, NavLink, Outlet, useLoaderData } from 'react-router';
+import {
+  data as remixData,
+  type LoaderFunctionArgs,
+} from '@shopify/remix-oxygen';
+import {Form, NavLink, Outlet, useLoaderData} from 'react-router';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 
 export function shouldRevalidate() {

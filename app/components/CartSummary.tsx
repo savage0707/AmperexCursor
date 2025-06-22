@@ -1,8 +1,8 @@
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
-import {useRef, useState} from 'react';
-import { FetcherWithComponents, Form } from 'react-router';
+import {useRef} from 'react';
+import {FetcherWithComponents} from 'react-router';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -13,221 +13,35 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
 
-  // Desktop layout
-  if (layout === 'desktop') {
-    return (
-      <div className="desktop-cart-summary">
-        <h3 className="desktop-summary-title">Order Summary</h3>
-        
-        <div className="desktop-summary-details">
-          <div className="desktop-summary-row">
-            <span>Subtotal</span>
-            <span>
-              {cart.cost?.subtotalAmount?.amount ? (
-                <Money data={cart.cost?.subtotalAmount} />
-              ) : (
-                '-'
-              )}
-            </span>
-          </div>
-
-          <DesktopCartDiscounts discountCodes={cart.discountCodes} />
-          <DesktopCartGiftCard giftCardCodes={cart.appliedGiftCards} />
-          
-          {cart.cost?.totalTaxAmount?.amount && (
-            <div className="desktop-summary-row">
-              <span>Tax</span>
-              <span>
-                <Money data={cart.cost.totalTaxAmount} />
-              </span>
-            </div>
-          )}
-
-          <div className="desktop-summary-row total">
-            <span>Total</span>
-            <span>
-              {cart.cost?.totalAmount?.amount ? (
-                <Money data={cart.cost.totalAmount} />
-              ) : (
-                '-'
-              )}
-            </span>
-          </div>
-        </div>
-
-        <DesktopCartCheckoutActions checkoutUrl={cart.checkoutUrl} />
-      </div>
-    );
-  }
-
-  // Calculate progress for free shipping
-  const subtotal = parseFloat(cart.cost?.subtotalAmount?.amount || '0');
-  const freeShippingThreshold = 100; // $100 for free shipping
-  const progress = Math.min((subtotal / freeShippingThreshold) * 100, 100);
-  const remainingForFreeShipping = Math.max(freeShippingThreshold - subtotal, 0);
-
   return (
-    <div aria-labelledby="cart-summary" className={`enhanced-cart-summary ${className}`}>
-      {/* Free Shipping Progress */}
-      {subtotal > 0 && subtotal < freeShippingThreshold && (
-        <div className="free-shipping-progress">
-          <div className="progress-header">
-            <span className="progress-text">
-              Add ${remainingForFreeShipping.toFixed(2)} more for FREE shipping!
-            </span>
-            <span className="progress-percentage">{progress.toFixed(0)}%</span>
-          </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{width: `${progress}%`}}
-            ></div>
-          </div>
-        </div>
-      )}
-
-      {subtotal >= freeShippingThreshold && (
-        <div className="free-shipping-achieved">
-          🎉 You've qualified for FREE shipping!
-        </div>
-      )}
-
-      <div className="summary-content">
-        <h3 className="summary-title">Order Summary</h3>
-        
-        <div className="summary-details">
-          <dl className="cart-subtotal">
-            <dt>Subtotal</dt>
-            <dd>
-              {cart.cost?.subtotalAmount?.amount ? (
-                <Money data={cart.cost?.subtotalAmount} />
-              ) : (
-                '-'
-              )}
-            </dd>
-          </dl>
-
-          <CartDiscounts discountCodes={cart.discountCodes} />
-          <CartGiftCard giftCardCodes={cart.appliedGiftCards} />
-          
-          {cart.cost?.totalTaxAmount?.amount && (
-            <dl className="cart-tax">
-              <dt>Tax</dt>
-              <dd>
-                <Money data={cart.cost.totalTaxAmount} />
-              </dd>
-            </dl>
+    <div aria-labelledby="cart-summary" className={className}>
+      <h4>Totals</h4>
+      <dl className="cart-subtotal">
+        <dt>Subtotal</dt>
+        <dd>
+          {cart.cost?.subtotalAmount?.amount ? (
+            <Money data={cart.cost?.subtotalAmount} />
+          ) : (
+            '-'
           )}
-
-          <dl className="cart-total">
-            <dt>Total</dt>
-            <dd>
-              {cart.cost?.totalAmount?.amount ? (
-                <Money data={cart.cost.totalAmount} />
-              ) : (
-                '-'
-              )}
-            </dd>
-          </dl>
-        </div>
-
-        <div className="summary-benefits">
-          <div className="benefit-item">
-            <span className="benefit-icon">🚚</span>
-            <span>Free shipping on orders over $100</span>
-          </div>
-          <div className="benefit-item">
-            <span className="benefit-icon">🔄</span>
-            <span>30-day easy returns</span>
-          </div>
-          <div className="benefit-item">
-            <span className="benefit-icon">🔒</span>
-            <span>Secure checkout</span>
-          </div>
-        </div>
-
-        <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
-      </div>
+        </dd>
+      </dl>
+      <CartDiscounts discountCodes={cart.discountCodes} />
+      <CartGiftCard giftCardCodes={cart.appliedGiftCards} />
+      <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
     </div>
   );
 }
-
 function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
-  const [isProcessing, setIsProcessing] = useState(false);
-
   if (!checkoutUrl) return null;
 
-  const handleCheckout = () => {
-    setIsProcessing(true);
-    // Simulate processing
-    setTimeout(() => {
-      window.location.href = checkoutUrl;
-    }, 500);
-  };
-
   return (
-    <div className="checkout-actions">
-      <button 
-        className="checkout-btn primary"
-        onClick={handleCheckout}
-        disabled={isProcessing}
-      >
-        {isProcessing ? (
-          <>
-            <div className="spinner"></div>
-            Processing...
-          </>
-        ) : (
-          <>
-            🛒 Continue to Checkout
-            <span className="checkout-arrow">→</span>
-          </>
-        )}
-      </button>
-      
-      <div className="payment-methods">
-        <span className="payment-label">We accept:</span>
-        <div className="payment-icons">
-          <span className="payment-icon">💳</span>
-          <span className="payment-icon">🏦</span>
-          <span className="payment-icon">📱</span>
-        </div>
-      </div>
+    <div>
+      <a href={checkoutUrl} target="_self">
+        <p>Continue to Checkout &rarr;</p>
+      </a>
+      <br />
     </div>
-  );
-}
-
-function DesktopCartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  if (!checkoutUrl) return null;
-
-  const handleCheckout = () => {
-    setIsProcessing(true);
-    // Simulate processing
-    setTimeout(() => {
-      window.location.href = checkoutUrl;
-    }, 500);
-  };
-
-  return (
-    <button 
-      className="desktop-checkout-btn"
-      onClick={handleCheckout}
-      disabled={isProcessing}
-    >
-      {isProcessing ? (
-        <>
-          <div className="spinner"></div>
-          Processing...
-        </>
-      ) : (
-        <>
-          Proceed to Checkout
-          <span>→</span>
-        </>
-      )}
-    </button>
   );
 }
 
@@ -242,15 +56,16 @@ function CartDiscounts({
       ?.map(({code}) => code) || [];
 
   return (
-    <div className="discounts-section">
+    <div>
       {/* Have existing discount, display it with a remove option */}
-      <dl hidden={!codes.length} className="applied-discounts">
-        <div className="discount-item">
+      <dl hidden={!codes.length}>
+        <div>
           <dt>Discount(s)</dt>
           <UpdateDiscountForm>
             <div className="cart-discount">
-              <code className="discount-code">{codes?.join(', ')}</code>
-              <button className="remove-discount-btn">Remove</button>
+              <code>{codes?.join(', ')}</code>
+              &nbsp;
+              <button>Remove</button>
             </div>
           </UpdateDiscountForm>
         </div>
@@ -258,14 +73,10 @@ function CartDiscounts({
 
       {/* Show an input to apply a discount */}
       <UpdateDiscountForm discountCodes={codes}>
-        <div className="discount-input-container">
-          <input 
-            type="text" 
-            name="discountCode" 
-            placeholder="Enter discount code" 
-            className="discount-input"
-          />
-          <button type="submit" className="apply-discount-btn">Apply</button>
+        <div>
+          <input type="text" name="discountCode" placeholder="Discount code" />
+          &nbsp;
+          <button type="submit">Apply</button>
         </div>
       </UpdateDiscountForm>
     </div>
@@ -292,26 +103,6 @@ function UpdateDiscountForm({
   );
 }
 
-function DesktopCartDiscounts({
-  discountCodes,
-}: {
-  discountCodes?: CartApiQueryFragment['discountCodes'];
-}) {
-  const codes: string[] =
-    discountCodes
-      ?.filter((discount) => discount.applicable)
-      ?.map(({code}) => code) || [];
-
-  if (codes.length === 0) return null;
-
-  return (
-    <div className="desktop-summary-row">
-      <span>Discount</span>
-      <span>-{codes.join(', ')}</span>
-    </div>
-  );
-}
-
 function CartGiftCard({
   giftCardCodes,
 }: {
@@ -335,20 +126,16 @@ function CartGiftCard({
   }
 
   return (
-    <div className="gift-card-section">
+    <div>
       {/* Have existing gift card applied, display it with a remove option */}
-      <dl hidden={!codes.length} className="applied-gift-cards">
-        <div className="gift-card-item">
+      <dl hidden={!codes.length}>
+        <div>
           <dt>Applied Gift Card(s)</dt>
           <UpdateGiftCardForm>
             <div className="cart-discount">
-              <code className="gift-card-code">{codes?.join(', ')}</code>
-              <button 
-                className="remove-gift-card-btn"
-                onClick={removeAppliedCode}
-              >
-                Remove
-              </button>
+              <code>{codes?.join(', ')}</code>
+              &nbsp;
+              <button onSubmit={() => removeAppliedCode}>Remove</button>
             </div>
           </UpdateGiftCardForm>
         </div>
@@ -359,15 +146,15 @@ function CartGiftCard({
         giftCardCodes={appliedGiftCardCodes.current}
         saveAppliedCode={saveAppliedCode}
       >
-        <div className="gift-card-input-container">
+        <div>
           <input
             type="text"
             name="giftCardCode"
-            placeholder="Enter gift card code"
+            placeholder="Gift card code"
             ref={giftCardCodeInput}
-            className="gift-card-input"
           />
-          <button type="submit" className="apply-gift-card-btn">Apply</button>
+          &nbsp;
+          <button type="submit">Apply</button>
         </div>
       </UpdateGiftCardForm>
     </div>
@@ -381,6 +168,7 @@ function UpdateGiftCardForm({
 }: {
   giftCardCodes?: string[];
   saveAppliedCode?: (code: string) => void;
+  removeAppliedCode?: () => void;
   children: React.ReactNode;
 }) {
   return (
@@ -399,22 +187,5 @@ function UpdateGiftCardForm({
         return children;
       }}
     </CartForm>
-  );
-}
-
-function DesktopCartGiftCard({
-  giftCardCodes,
-}: {
-  giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
-}) {
-  const codes: string[] = giftCardCodes?.map(({code}) => code) || [];
-
-  if (codes.length === 0) return null;
-
-  return (
-    <div className="desktop-summary-row">
-      <span>Gift Card</span>
-      <span>-{codes.join(', ')}</span>
-    </div>
   );
 }
