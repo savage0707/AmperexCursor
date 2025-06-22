@@ -1,10 +1,11 @@
 import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import { Await, useLoaderData, Link, type MetaFunction } from 'react-router';
+import { Await, useLoaderData, Link, type MetaFunction, useRouteLoaderData } from 'react-router';
 import {Suspense} from 'react';
 import {Image, Money} from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
+  HeaderQuery,
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 
@@ -58,10 +59,98 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+  const {header} = useRouteLoaderData('root') as {header: HeaderQuery};
+
   return (
     <div className="home">
+      <HeroSection />
+      <CategoryCarousel collections={header.collections} />
+      <ClearanceBanner />
       <FeaturedCollection collection={data.featuredCollection} />
+      <WhyChooseUs />
       <RecommendedProducts products={data.recommendedProducts} />
+    </div>
+  );
+}
+
+function HeroSection() {
+  return (
+    <div className="hero-section">
+      <div className="hero-content">
+        <h1>Welcome to AmpereX Pakistan</h1>
+        <p>Your one-stop shop for the best electronic components.</p>
+        <Link to="/collections/all" className="button">
+          Shop Now
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function CategoryCarousel({
+  collections,
+}: {
+  collections: HeaderQuery['collections'];
+}) {
+  return (
+    <div className="category-carousel">
+      <div className="category-carousel-items">
+        {collections?.nodes.map((collection) => (
+          <Link
+            key={collection.id}
+            to={`/collections/${collection.handle}`}
+            className="category-item"
+          >
+            {/* In a real store, you'd use collection metafields for icons */}
+            <span className="category-icon">📱</span>
+            <span className="category-title">{collection.title}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ClearanceBanner() {
+  return (
+    <div className="clearance-banner">
+      <div className="clearance-content">
+        <h2>CLEARANCE COUNTDOWN</h2>
+        <p>GRAB YOUR SCREEN BEFORE IT'S GONE!</p>
+      </div>
+      <div className="clearance-action">
+        <span>STARTING FROM</span>
+        <strong>18.9 KWD</strong>
+        <Link to="/collections/all" className="button">
+          SHOP NOW
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function WhyChooseUs() {
+  return (
+    <div className="why-choose-us">
+      <h2>Why Choose AmpereX?</h2>
+      <div className="why-choose-us-grid">
+        <div className="feature-item">
+          {/* You can replace these with actual icons later */}
+          <span className="feature-icon">✓</span>
+          <h3>Quality Components</h3>
+          <p>We source the best components to ensure high quality and reliability.</p>
+        </div>
+        <div className="feature-item">
+          <span className="feature-icon">🚚</span>
+          <h3>Fast Shipping</h3>
+          <p>Get your parts delivered quickly to your doorstep, anywhere in Pakistan.</p>
+        </div>
+        <div className="feature-item">
+          <span className="feature-icon">💬</span>
+          <h3>Expert Support</h3>
+          <p>Our team is here to help you with any questions you may have.</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -73,18 +162,21 @@ function FeaturedCollection({
 }) {
   if (!collection) return null;
   const image = collection?.image;
+  const products = collection.products.nodes;
+
   return (
-    <Link
-      className="featured-collection"
-      to={`/collections/${collection.handle}`}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
-        </div>
-      )}
-      <h1>{collection.title}</h1>
-    </Link>
+    <div className="featured-collection-section">
+      <h2>{collection.title}</h2>
+      <div className="featured-products-grid">
+        {products.map((product) => (
+          <ProductItem
+            key={product.id}
+            product={product}
+            loading="lazy"
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -126,6 +218,11 @@ const FEATURED_COLLECTION_QUERY = `#graphql
       height
     }
     handle
+    products(first: 4) {
+      nodes {
+        ...RecommendedProduct
+      }
+    }
   }
   query FeaturedCollection($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {

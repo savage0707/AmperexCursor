@@ -1,5 +1,5 @@
-import {Suspense} from 'react';
-import { Await, NavLink, useAsyncValue } from 'react-router';
+import {Suspense, useState} from 'react';
+import { Await, NavLink, useAsyncValue, Link, Form } from 'react-router';
 import {
   type CartViewPayload,
   useAnalytics,
@@ -23,82 +23,69 @@ export function Header({
   cart,
   publicStoreDomain,
 }: HeaderProps) {
-  const {shop, menu} = header;
+  const {shop, menu, collections} = header;
   return (
-    <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
-      </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
-    </header>
-  );
-}
-
-export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
-  viewport,
-  publicStoreDomain,
-}: {
-  menu: HeaderProps['header']['menu'];
-  primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
-  viewport: Viewport;
-  publicStoreDomain: HeaderProps['publicStoreDomain'];
-}) {
-  const className = `header-menu-${viewport}`;
-  const {close} = useAside();
-
-  return (
-    <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
+    <>
+      <TopBar />
+      <header className="header">
+        <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+          <strong>{shop.name}</strong>
         </NavLink>
-      )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
-
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        return (
-          <NavLink
-            className="header-menu-item"
-            end
-            key={item.id}
-            onClick={close}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
+        <HeaderMenu viewport="desktop" />
+        <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+      </header>
+      <nav className="navigation-bar">
+        <div className="mega-menu-container">
+          <NavLink to="/collections/all" className="all-categories-button">
+            All Categories
           </NavLink>
-        );
-      })}
-    </nav>
+          <div className="mega-menu-panel">
+            <div className="mega-menu-collection-list">
+              {collections?.nodes.map((collection) => (
+                <NavLink
+                  to={`/collections/${collection.handle}`}
+                  key={collection.id}
+                >
+                  {collection.title}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </>
   );
 }
 
-function HeaderCtas({
-  isLoggedIn,
-  cart,
-}: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
+function TopBar() {
+  return (
+    <div className="top-bar">
+      <div className="top-bar-left">
+        <span>An XpressTraders Enterprise</span>
+      </div>
+      <div className="top-bar-right">
+        <Link to="/contact">Chat Support</Link>
+        <Link to="/contact">Easy Exchange</Link>
+        <span>+92 123 4567890</span>
+      </div>
+    </div>
+  );
+}
+
+export function HeaderMenu({viewport}: {viewport: Viewport}) {
+  if (viewport === 'desktop') {
+    return (
+      <Form method="get" action="/search" className="header-search-form">
+        <input type="search" name="q" placeholder="Search" />
+        <button type="submit">Search</button>
+      </Form>
+    );
+  }
+  
+  return null;
+}
+
+function HeaderCtas({isLoggedIn, cart}: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
@@ -109,7 +96,6 @@ function HeaderCtas({
           </Await>
         </Suspense>
       </NavLink>
-      <SearchToggle />
       <CartToggle cart={cart} />
     </nav>
   );

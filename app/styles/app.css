@@ -163,53 +163,56 @@ button.reset:hover:not(:has(> *)) {
 * --------------------------------------------------
 */
 .header {
+  background-color: #004c97;
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
   align-items: center;
-  background: #fff;
-  display: flex;
-  height: var(--header-height);
-  padding: 0 1rem;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  padding: 1rem 5%;
+  gap: 20px;
 }
 
-.header-menu-mobile-toggle {
-  @media (min-width: 48em) {
-    display: none;
-  }
-}
-
-.header-menu-mobile {
-  display: flex;
-  flex-direction: column;
-  grid-gap: 1rem;
+.header strong {
+  color: #fff;
+  font-size: 1.5rem;
 }
 
 .header-menu-desktop {
-  display: none;
-  grid-gap: 1rem;
-  @media (min-width: 45em) {
-    display: flex;
-    grid-gap: 1rem;
-    margin-left: 3rem;
-  }
-}
-
-.header-menu-item {
-  cursor: pointer;
+  display: flex;
+  justify-content: center;
 }
 
 .header-ctas {
-  align-items: center;
   display: flex;
-  grid-gap: 1rem;
-  margin-left: auto;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
 }
 
-.header-ctas > * {
-  min-width: fit-content;
+.header-search-form {
+  position: relative;
+  width: 100%;
 }
 
+.header-search-form input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: none;
+}
+
+.header-search-form button {
+  display: none; /* Hiding the text button */
+}
+
+/* Style for the main nav bar */
+.header-menu-item {
+  padding: 1rem;
+}
+
+.header-menu-item:hover {
+  background-color: #003d7a;
+}
 
 /*
 * --------------------------------------------------
@@ -518,5 +521,273 @@ button.reset:hover:not(:has(> *)) {
 */
 
 .account-logout {
+  display: inline-block;
+}
+
+/*
+  Mega Menu Styles
+*/
+.mega-menu-container {
+  position: relative;
+}
+
+.mega-menu-panel {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  min-width: 200px;
+  z-index: 1000;
+}
+
+.mega-menu-container:hover .mega-menu-panel {
+  display: block;
+}
+
+/*
+  Hero Section Styles
+*/
+.hero-section {
+  background-color: #f2f2f2;
+  text-align: center;
+  padding: 80px 20px;
+  margin-bottom: 2rem;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.hero-content .button {
+  background-color: #000;
+  color: #fff;
+  padding: 15px 30px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+/*
+  Featured Collection Grid Styles
+*/
+.featured-collection-section {
+  padding: 2rem 0;
+}
+
+.featured-collection-section h2 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.featured-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/*
+  Why Choose Us Styles
+*/
+.why-choose-us {
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.why-choose-us h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.why-choose-us-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.feature-item {
+  padding: 20px;
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/*
+  Top Bar Styles
+*/
+.top-bar {
+  background-color: #1a2a44;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 5%;
+  font-size: 0.8rem;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.top-bar-right a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.top-bar-right a:hover {
+  text-decoration: underline;
+}
+
+/*
+  Navigation Bar Styles
+*/
+.navigation-bar {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+}
+
+.all-categories-button {
+  background-color: #f5a623;
+  color: #000;
+  font-weight: bold;
+  padding: 15px 30px;
+  display: block;
+  text-decoration: none;
+}
+
+.all-categories-button:hover {
+  background-color: #f7b94e;
+}
+
+.mega-menu-collection-list a {
+  display: block;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #333;
+}
+
+.mega-menu-collection-list a:hover {
+  background-color: #f2f2f2;
+}
+
+/*
+  Category Carousel Styles
+*/
+.category-carousel {
+  padding: 2rem 0;
+  margin: 0 5%;
+}
+
+.category-carousel-items {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding-bottom: 15px; /* For scrollbar spacing */
+  /* Hide scrollbar */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.category-carousel-items::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #000;
+  width: 120px;
+  height: 120px;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  flex-shrink: 0; /* Prevent items from shrinking */
+  transition: all 0.2s ease-in-out;
+}
+
+.category-item:hover {
+  border-color: #f5a623;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.category-icon {
+  font-size: 2.5rem;
+}
+
+.category-title {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/*
+  Clearance Banner Styles
+*/
+.clearance-banner {
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin: 2rem 5%;
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clearance-content h2 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #333;
+  margin: 0;
+}
+
+.clearance-content p {
+  font-size: 1rem;
+  color: #555;
+  margin: 0;
+}
+
+.clearance-action {
+  text-align: center;
+}
+
+.clearance-action span {
+  font-size: 0.9rem;
+  display: block;
+}
+
+.clearance-action strong {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 1rem;
+  color: #004c97;
+}
+
+.clearance-action .button {
+  background-color: #f5a623;
+  color: #000;
+  padding: 15px 30px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 5px;
   display: inline-block;
 }
