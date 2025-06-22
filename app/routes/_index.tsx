@@ -1,4 +1,4 @@
-import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {type LoaderFunctionArgs} from 'react-router';
 import { Await, useLoaderData, Link, type MetaFunction, useRouteLoaderData } from 'react-router';
 import {Suspense} from 'react';
 import {Image, Money} from '@shopify/hydrogen';
@@ -246,6 +246,27 @@ function RecommendedProducts({
   );
 }
 
+const RECOMMENDED_PRODUCT_FRAGMENT = `#graphql
+  fragment RecommendedProduct on Product {
+    id
+    title
+    handle
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
+`;
+
 const FEATURED_COLLECTION_QUERY = `#graphql
   fragment FeaturedCollection on Collection {
     id
@@ -272,27 +293,10 @@ const FEATURED_COLLECTION_QUERY = `#graphql
       }
     }
   }
-` as const;
+  ${RECOMMENDED_PRODUCT_FRAGMENT}
+`;
 
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
-    id
-    title
-    handle
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    featuredImage {
-      id
-      url
-      altText
-      width
-      height
-    }
-  }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
     products(first: 4, sortKey: UPDATED_AT, reverse: true) {
@@ -301,4 +305,5 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       }
     }
   }
-` as const;
+  ${RECOMMENDED_PRODUCT_FRAGMENT}
+`;

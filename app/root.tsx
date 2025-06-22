@@ -1,6 +1,6 @@
 import React from 'react';
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
-import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {type LoaderFunctionArgs} from 'react-router';
 import {
   Outlet,
   useRouteError,
@@ -100,19 +100,16 @@ export async function loader(args: LoaderFunctionArgs) {
  */
 async function loadCriticalData({context}: LoaderFunctionArgs) {
   const {storefront} = context;
-  const allCategoriesMenuId = 'gid://shopify/Menu/375715463470';
 
   try {
     console.log('Loading basic header data...');
     
-    // First try with the menu ID
     const [header] = await Promise.all([
       storefront.query(HEADER_QUERY, {
         cache: storefront.CacheLong(),
         variables: {
           headerMenuHandle: 'main-menu',
-          allCategoriesMenuId,
-          hasAllCategoriesMenuId: true,
+          allCategoriesMenuHandle: 'main-menu',
         },
       }),
     ]);
@@ -120,45 +117,25 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
     console.log('Header data loaded successfully:', header);
     return {header};
   } catch (error) {
-    console.error('Error loading header data with menu ID:', error);
+    console.error('Error loading header data:', error);
     
-    // Try without the allCategoriesMenu
-    try {
-      console.log('Trying without allCategoriesMenu...');
-      const [header] = await Promise.all([
-        storefront.query(HEADER_QUERY, {
-          cache: storefront.CacheLong(),
-          variables: {
-            headerMenuHandle: 'main-menu',
-            allCategoriesMenuId: '', // Pass an empty string for the ID
-            hasAllCategoriesMenuId: false, // Set the boolean to false
-          },
-        }),
-      ]);
-      
-      console.log('Header data loaded without menu:', header);
-      return {header};
-    } catch (fallbackError) {
-      console.error('Fallback also failed:', fallbackError);
-      
-      // Return minimal fallback data to prevent crashes
-      return {
-        header: {
-          shop: {
-            id: 'fallback-shop',
-            name: 'AmpereX Pakistan',
-            description: 'Your one-stop shop for electronic components',
-            primaryDomain: { url: 'https://amperex.com' },
-            brand: { logo: { image: { url: '' } } }
-          },
-          menu: null,
-          allCategoriesMenu: null,
-          collections: {
-            nodes: []
-          }
+    // Return minimal fallback data to prevent crashes
+    return {
+      header: {
+        shop: {
+          id: 'fallback-shop',
+          name: 'AmpereX Pakistan',
+          description: 'Your one-stop shop for electronic components',
+          primaryDomain: { url: 'https://amperex.com' },
+          brand: { logo: { image: { url: '' } } }
+        },
+        menu: null,
+        allCategoriesMenu: null,
+        collections: {
+          nodes: []
         }
-      };
-    }
+      }
+    };
   }
 }
 
