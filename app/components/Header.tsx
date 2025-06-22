@@ -124,7 +124,6 @@ export function HeaderMenu({
     return (
       <Form method="get" action="/search" className="header-search-form">
         <input type="search" name="q" placeholder="Search" />
-        <button type="submit">Search</button>
       </Form>
     );
   }
@@ -189,15 +188,6 @@ function HeaderMenuMobileToggle() {
       onClick={() => open('mobile')}
     >
       <h3>☰</h3>
-    </button>
-  );
-}
-
-function SearchToggle() {
-  const {open} = useAside();
-  return (
-    <button className="reset" onClick={() => open('search')}>
-      Search
     </button>
   );
 }

@@ -47,6 +47,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
           title
           id
           vendor
+          warranty: metafield(namespace: "custom", key: "warranty") {
+            value
+          }
         }
         selectedOptions {
           name
@@ -97,6 +100,10 @@ export const CART_QUERY_FRAGMENT = `#graphql
           title
           id
           vendor
+          description
+          warranty: metafield(namespace: "custom", key: "warranty") {
+            value
+          }
         }
         selectedOptions {
           name

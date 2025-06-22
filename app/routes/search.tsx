@@ -4,7 +4,6 @@ import {
 } from '@shopify/remix-oxygen';
 import {useLoaderData, type MetaFunction} from 'react-router';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
-import {SearchForm} from '~/components/SearchForm';
 import {SearchResults} from '~/components/SearchResults';
 import {
   type RegularSearchReturn,
@@ -42,21 +41,6 @@ export default function SearchPage() {
   return (
     <div className="search">
       <h1>Search</h1>
-      <SearchForm>
-        {({inputRef}) => (
-          <>
-            <input
-              defaultValue={term}
-              name="q"
-              placeholder="Search…"
-              ref={inputRef}
-              type="search"
-            />
-            &nbsp;
-            <button type="submit">Search</button>
-          </>
-        )}
-      </SearchForm>
       {error && <p style={{color: 'red'}}>{error}</p>}
       {!term || !result?.total ? (
         <SearchResults.Empty />

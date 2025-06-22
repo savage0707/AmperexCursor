@@ -26,19 +26,19 @@ export function CartLineItem({
   const {close} = useAside();
 
   return (
-    <li key={id} className="cart-line">
+    <li key={id} className="desktop-cart-line">
       {image && (
-        <Image
-          alt={title}
-          aspectRatio="1/1"
-          data={image}
-          height={100}
-          loading="lazy"
-          width={100}
-        />
+        <div className="desktop-cart-line-image">
+          <Image
+            alt={title}
+            aspectRatio="1/1"
+            data={image}
+            loading="lazy"
+          />
+        </div>
       )}
 
-      <div>
+      <div className="desktop-cart-line-details">
         <Link
           prefetch="intent"
           to={lineItemUrl}
@@ -47,22 +47,37 @@ export function CartLineItem({
               close();
             }
           }}
+          className="desktop-cart-line-title"
         >
-          <p>
-            <strong>{product.title}</strong>
-          </p>
+          <strong>{product.title}</strong>
         </Link>
-        <ProductPrice price={line?.cost?.totalAmount} />
-        <ul>
-          {selectedOptions.map((option) => (
-            <li key={option.name}>
-              <small>
-                {option.name}: {option.value}
-              </small>
-            </li>
-          ))}
-        </ul>
+        <div className="desktop-cart-line-variant">
+          <ul>
+            {selectedOptions.map((option) => (
+              <li key={option.name}>
+                <small>
+                  {option.name}: {option.value}
+                </small>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {product.warranty?.value && (
+          <div className="desktop-cart-line-warranty">
+            <p>
+              <strong>Warranty:</strong> {product.warranty.value}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="desktop-cart-line-actions">
         <CartLineQuantity line={line} />
+        <CartLineRemoveButton lineIds={[id]} disabled={!!line?.isOptimistic} />
+      </div>
+
+      <div className="desktop-cart-line-price">
+        <ProductPrice price={line?.cost?.totalAmount} />
       </div>
     </li>
   );
@@ -80,31 +95,31 @@ function CartLineQuantity({line}: {line: CartLine}) {
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
-    <div className="cart-line-quantity">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
+    <div className="desktop-quantity-controls">
+      <small>Qty:</small>
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
           aria-label="Decrease quantity"
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
           value={prevQuantity}
+          className="desktop-quantity-btn"
         >
-          <span>&#8722; </span>
+          <span>&#8722;</span>
         </button>
       </CartLineUpdateButton>
-      &nbsp;
+      <span className="desktop-quantity-display">{quantity}</span>
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
           aria-label="Increase quantity"
           name="increase-quantity"
           value={nextQuantity}
           disabled={!!isOptimistic}
+          className="desktop-quantity-btn"
         >
           <span>&#43;</span>
         </button>
       </CartLineUpdateButton>
-      &nbsp;
-      <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
     </div>
   );
 }
@@ -128,7 +143,7 @@ function CartLineRemoveButton({
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit">
+      <button disabled={disabled} type="submit" className="desktop-remove-btn">
         Remove
       </button>
     </CartForm>
