@@ -1,33 +1,22 @@
-import { type MetaFunction, useLoaderData } from 'react-router';
-import type {CartQueryDataReturn} from '@shopify/hydrogen';
-import {CartForm} from '@shopify/hydrogen';
-import {
-  data,
-  type LoaderFunctionArgs,
-  type ActionFunctionArgs,
-  type HeadersFunction,
-} from '@shopify/remix-oxygen';
-import {CartMain} from '~/components/CartMain';
+import { Await } from 'react-router-dom';
+import { Suspense } from 'react';
+import type { CartQueryData } from '@shopify/hydrogen';
+import { CartForm } from '@shopify/hydrogen';
+import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { CartMain } from '~/components/CartMain';
+import { useRootLoaderData } from '~/lib/root-loader';
 
-export const meta: MetaFunction = () => {
-  return [{title: `Hydrogen | Cart`}];
-};
-
-export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
-
-export async function action({request, context}: ActionFunctionArgs) {
-  const {cart} = context;
-
+export async function action({ request, context }: ActionFunctionArgs) {
+  const { session, cart } = context;
   const formData = await request.formData();
-
-  const {action, inputs} = CartForm.getFormInput(formData);
+  const { action, inputs } = CartForm.getFormInput(formData);
 
   if (!action) {
     throw new Error('No action provided');
   }
 
   let status = 200;
-  let result: CartQueryDataReturn;
+  let result: CartQueryData;
 
   switch (action) {
     case CartForm.ACTIONS.LinesAdd:
@@ -39,79 +28,58 @@ export async function action({request, context}: ActionFunctionArgs) {
     case CartForm.ACTIONS.LinesRemove:
       result = await cart.removeLines(inputs.lineIds);
       break;
-    case CartForm.ACTIONS.DiscountCodesUpdate: {
+    case CartForm.ACTIONS.DiscountCodesUpdate:
       const formDiscountCode = inputs.discountCode;
-
-      // User inputted discount code
-      const discountCodes = (
-        formDiscountCode ? [formDiscountCode] : []
-      ) as string[];
-
-      // Combine discount codes already applied on cart
-      discountCodes.push(...inputs.discountCodes);
-
+      const discountCodes = formDiscountCode ? [formDiscountCode] : [];
       result = await cart.updateDiscountCodes(discountCodes);
       break;
-    }
-    case CartForm.ACTIONS.GiftCardCodesUpdate: {
-      const formGiftCardCode = inputs.giftCardCode;
-
-      // User inputted gift card code
-      const giftCardCodes = (
-        formGiftCardCode ? [formGiftCardCode] : []
-      ) as string[];
-
-      // Combine gift card codes already applied on cart
-      giftCardCodes.push(...inputs.giftCardCodes);
-
-      result = await cart.updateGiftCardCodes(giftCardCodes);
-      break;
-    }
-    case CartForm.ACTIONS.BuyerIdentityUpdate: {
-      result = await cart.updateBuyerIdentity({
-        ...inputs.buyerIdentity,
-      });
-      break;
-    }
+    case CartForm.ACTIONS.GiftCardCodesUpdate:
+        result = await cart.updateGiftCardCodes(inputs.giftCardCodes);
+        break;
     default:
-      throw new Error(`${action} cart action is not defined`);
+      throw new Error(`${action} action is not supported`);
   }
 
-  const cartId = result?.cart?.id;
-  const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
-  const {cart: cartResult, errors, warnings} = result;
+  const cartId = result.cart.id;
+  const headers = cart.setCartId(result.cart.id);
 
-  const redirectTo = formData.get('redirectTo') ?? null;
-  if (typeof redirectTo === 'string') {
-    status = 303;
-    headers.set('Location', redirectTo);
-  }
+  const { cart: cartResult, errors } = result;
 
-  return data(
+  // The Consumable an action returns is used by the optimistic cart UI
+  // to update the cart in the UI before the action completes.
+  return json(
     {
       cart: cartResult,
       errors,
-      warnings,
       analytics: {
         cartId,
       },
     },
-    {status, headers},
+    {
+      status,
+      headers,
+    },
   );
 }
 
-export async function loader({context}: LoaderFunctionArgs) {
-  const {cart} = context;
-  return await cart.get();
+export async function loader({ context }: LoaderFunctionArgs) {
+  const { cart } = context;
+  return json(await cart.get());
 }
 
 export default function Cart() {
-  const cart = useLoaderData<typeof loader>();
+  const rootData = useRootLoaderData();
+  const cartPromise = rootData.cart;
 
   return (
-    <div className="cart">
-      <h1>Cart</h1>
-      <CartMain layout="page" cart={cart} />
+    <div className="cart-page">
+      <Suspense fallback={<p>Loading cart...</p>}>
+        <Await resolve={cartPromise}>
+          {(cart) => (
+            <CartMain cart={cart as any} layout="page" />
+          )}
+        </Await>
+      </Suspense>
     </div>
   );
 }

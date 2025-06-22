@@ -1,3 +1,4 @@
+import React from 'react';
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
 import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {
@@ -83,7 +84,7 @@ export async function loader(args: LoaderFunctionArgs) {
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
     }),
     consent: {
-      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+      checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN || `${env.PUBLIC_STORE_DOMAIN}/checkout` || 'amperex.myshopify.com/checkout',
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
       withPrivacyBanner: false,
       // localize the privacy banner
@@ -100,18 +101,62 @@ export async function loader(args: LoaderFunctionArgs) {
 async function loadCriticalData({context}: LoaderFunctionArgs) {
   const {storefront} = context;
 
-  const [header] = await Promise.all([
-    storefront.query(HEADER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-        allCategoriesMenuHandle: 'all-categories', // The handle for your new menu
-      },
-    }),
-    // Add other queries here, so that they are loaded in parallel
-  ]);
+  try {
+    console.log('Loading basic header data...');
+    
+    // First try with the menu ID
+    const [header] = await Promise.all([
+      storefront.query(HEADER_QUERY, {
+        cache: storefront.CacheLong(),
+        variables: {
+          headerMenuHandle: 'main-menu',
+          allCategoriesMenuId: 'gid://shopify/Menu/375715463470',
+        },
+      }),
+    ]);
 
-  return {header};
+    console.log('Header data loaded successfully:', header);
+    return {header};
+  } catch (error) {
+    console.error('Error loading header data with menu ID:', error);
+    
+    // Try without the allCategoriesMenu
+    try {
+      console.log('Trying without allCategoriesMenu...');
+      const [header] = await Promise.all([
+        storefront.query(HEADER_QUERY, {
+          cache: storefront.CacheLong(),
+          variables: {
+            headerMenuHandle: 'main-menu',
+            allCategoriesMenuId: null, // Don't include the menu
+          },
+        }),
+      ]);
+      
+      console.log('Header data loaded without menu:', header);
+      return {header};
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      
+      // Return minimal fallback data to prevent crashes
+      return {
+        header: {
+          shop: {
+            id: 'fallback-shop',
+            name: 'AmpereX Pakistan',
+            description: 'Your one-stop shop for electronic components',
+            primaryDomain: { url: 'https://amperex.com' },
+            brand: { logo: { image: { url: '' } } }
+          },
+          menu: null,
+          allCategoriesMenu: null,
+          collections: {
+            nodes: []
+          }
+        }
+      };
+    }
+  }
 }
 
 /**

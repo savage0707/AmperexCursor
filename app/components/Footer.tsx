@@ -18,10 +18,18 @@ export function Footer({
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
+            {footer?.menu && header?.shop?.primaryDomain?.url && (
               <FooterMenu
                 menu={footer.menu}
                 primaryDomainUrl={header.shop.primaryDomain.url}
+                publicStoreDomain={publicStoreDomain}
+              />
+            )}
+            {/* Fallback footer content when data is missing */}
+            {(!footer?.menu || !header?.shop?.primaryDomain?.url) && (
+              <FooterMenu
+                menu={FALLBACK_FOOTER_MENU}
+                primaryDomainUrl="https://amperex.com"
                 publicStoreDomain={publicStoreDomain}
               />
             )}

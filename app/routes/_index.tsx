@@ -28,14 +28,21 @@ export async function loader(args: LoaderFunctionArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({context}: LoaderFunctionArgs) {
-  const [{collections}] = await Promise.all([
-    context.storefront.query(FEATURED_COLLECTION_QUERY),
-    // Add other queries here, so that they are loaded in parallel
-  ]);
+  try {
+    const [{collections}] = await Promise.all([
+      context.storefront.query(FEATURED_COLLECTION_QUERY),
+      // Add other queries here, so that they are loaded in parallel
+    ]);
 
-  return {
-    featuredCollection: collections.nodes[0],
-  };
+    return {
+      featuredCollection: collections.nodes[0] || null,
+    };
+  } catch (error) {
+    console.error('Error loading featured collection:', error);
+    return {
+      featuredCollection: null,
+    };
+  }
 }
 
 /**
@@ -64,7 +71,7 @@ export default function Homepage() {
   return (
     <div className="home">
       <HeroSection />
-      <CategoryCarousel collections={header.collections} />
+      <CategoryCarousel collections={header?.collections} />
       <ClearanceBanner />
       <FeaturedCollection collection={data.featuredCollection} />
       <WhyChooseUs />
@@ -92,10 +99,29 @@ function CategoryCarousel({
 }: {
   collections: HeaderQuery['collections'];
 }) {
+  // Handle undefined or empty collections
+  if (!collections?.nodes || collections.nodes.length === 0) {
+    return (
+      <div className="category-carousel">
+        <div className="category-carousel-items">
+          {/* Fallback category items */}
+          <Link to="/collections" className="category-item">
+            <span className="category-icon">📱</span>
+            <span className="category-title">Collections</span>
+          </Link>
+          <Link to="/collections/all" className="category-item">
+            <span className="category-icon">🛍️</span>
+            <span className="category-title">All Products</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="category-carousel">
       <div className="category-carousel-items">
-        {collections?.nodes.map((collection) => (
+        {collections.nodes.map((collection) => (
           <Link
             key={collection.id}
             to={`/collections/${collection.handle}`}
@@ -160,21 +186,35 @@ function FeaturedCollection({
 }: {
   collection: FeaturedCollectionFragment;
 }) {
-  if (!collection) return null;
+  if (!collection) {
+    return (
+      <div className="featured-collection-section">
+        <h2>Featured Products</h2>
+        <div className="featured-products-grid">
+          <p>Loading featured products...</p>
+        </div>
+      </div>
+    );
+  }
+  
   const image = collection?.image;
-  const products = collection.products.nodes;
+  const products = collection.products?.nodes || [];
 
   return (
     <div className="featured-collection-section">
       <h2>{collection.title}</h2>
       <div className="featured-products-grid">
-        {products.map((product) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading="lazy"
-          />
-        ))}
+        {products.length > 0 ? (
+          products.map((product) => (
+            <ProductItem
+              key={product.id}
+              product={product}
+              loading="lazy"
+            />
+          ))
+        ) : (
+          <p>No products available in this collection.</p>
+        )}
       </div>
     </div>
   );

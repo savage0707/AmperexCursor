@@ -1,4 +1,4 @@
-import {Suspense, useState} from 'react';
+import React, {Suspense, useState} from 'react';
 import { Await, NavLink, useAsyncValue, Link, Form } from 'react-router';
 import {
   type CartViewPayload,
@@ -24,12 +24,43 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu, collections, allCategoriesMenu} = header;
+  
+  // Add error handling for undefined shop data
+  if (!shop) {
+    return (
+      <>
+        <TopBar />
+        <header className="header">
+          <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+            <strong>AmpereX Pakistan</strong>
+          </NavLink>
+          <HeaderMenu viewport="desktop" />
+          <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+        </header>
+        <nav className="navigation-bar">
+          <div className="mega-menu-container">
+            <NavLink to="/collections/all" className="all-categories-button">
+              ALL CATEGORIES
+            </NavLink>
+            <div className="mega-menu-panel">
+              <div className="mega-menu-collection-list">
+                {/* Fallback menu items */}
+                <NavLink to="/collections">Collections</NavLink>
+                <NavLink to="/collections/all">All Products</NavLink>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </>
+    );
+  }
+  
   return (
     <>
       <TopBar />
       <header className="header">
         <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-          <strong>{shop.name}</strong>
+          <strong>{shop?.name || 'AmpereX Pakistan'}</strong>
         </NavLink>
         <HeaderMenu viewport="desktop" />
         <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
@@ -41,14 +72,20 @@ export function Header({
           </NavLink>
           <div className="mega-menu-panel">
             <div className="mega-menu-collection-list">
-              {allCategoriesMenu?.items.map((item) => (
+              {allCategoriesMenu?.items?.map((item) => (
                 <NavLink
                   to={item.url || ''}
                   key={item.id}
                 >
                   {item.title}
                 </NavLink>
-              ))}
+              )) || (
+                // Fallback menu items if allCategoriesMenu is not available
+                <>
+                  <NavLink to="/collections">Collections</NavLink>
+                  <NavLink to="/collections/all">All Products</NavLink>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -72,13 +109,56 @@ function TopBar() {
   );
 }
 
-export function HeaderMenu({viewport}: {viewport: Viewport}) {
+export function HeaderMenu({
+  viewport,
+  menu,
+  primaryDomainUrl,
+  publicStoreDomain,
+}: {
+  viewport: Viewport;
+  menu?: HeaderQuery['menu'];
+  primaryDomainUrl?: string;
+  publicStoreDomain?: string;
+}) {
   if (viewport === 'desktop') {
     return (
       <Form method="get" action="/search" className="header-search-form">
         <input type="search" name="q" placeholder="Search" />
         <button type="submit">Search</button>
       </Form>
+    );
+  }
+  
+  if (viewport === 'mobile') {
+    return (
+      <nav className="header-menu-mobile" role="navigation">
+        {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
+          if (!item.url) return null;
+          // if the url is internal, we strip the domain
+          const url =
+            item.url.includes('myshopify.com') ||
+            item.url.includes(publicStoreDomain || '') ||
+            item.url.includes(primaryDomainUrl || '')
+              ? new URL(item.url).pathname
+              : item.url;
+          const isExternal = !url.startsWith('/');
+          return isExternal ? (
+            <a href={url} key={item.id} rel="noopener noreferrer" target="_blank">
+              {item.title}
+            </a>
+          ) : (
+            <NavLink
+              end
+              key={item.id}
+              prefetch="intent"
+              style={activeLinkStyle}
+              to={url}
+            >
+              {item.title}
+            </NavLink>
+          );
+        })}
+      </nav>
     );
   }
   

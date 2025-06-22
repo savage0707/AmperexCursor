@@ -208,7 +208,7 @@ export const HEADER_QUERY = `#graphql
     $country: CountryCode
     $headerMenuHandle: String!
     $language: LanguageCode
-    $allCategoriesMenuHandle: String!
+    $allCategoriesMenuId: ID
   ) @inContext(language: $language, country: $country) {
     shop {
       ...Shop
@@ -216,7 +216,7 @@ export const HEADER_QUERY = `#graphql
     menu(handle: $headerMenuHandle) {
       ...Menu
     }
-    allCategoriesMenu: menu(handle: $allCategoriesMenuHandle) {
+    allCategoriesMenu: menu(id: $allCategoriesMenuId) @include(if: $allCategoriesMenuId) {
       ...Menu
     }
     collections(first: 10) {
