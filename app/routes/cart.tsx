@@ -1,8 +1,7 @@
-import { Await } from 'react-router-dom';
+import { Await } from 'react-router';
 import { Suspense } from 'react';
-import type { CartQueryData } from '@shopify/hydrogen';
 import { CartForm } from '@shopify/hydrogen';
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { data, type ActionFunctionArgs, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import { CartMain } from '~/components/CartMain';
 import { useRootLoaderData } from '~/lib/root-loader';
 
@@ -16,7 +15,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   let status = 200;
-  let result: CartQueryData;
+  let result: any;
 
   switch (action) {
     case CartForm.ACTIONS.LinesAdd:
@@ -47,7 +46,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   // The Consumable an action returns is used by the optimistic cart UI
   // to update the cart in the UI before the action completes.
-  return json(
+  return data(
     {
       cart: cartResult,
       errors,
@@ -64,7 +63,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const { cart } = context;
-  return json(await cart.get());
+  return data(await cart.get());
 }
 
 export default function Cart() {

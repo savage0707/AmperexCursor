@@ -2,7 +2,7 @@ import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Image, type OptimisticCartLine} from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
@@ -28,6 +28,52 @@ export function CartLineItem({
   const [isHovered, setIsHovered] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
 
+  // Desktop layout
+  if (layout === 'desktop') {
+    return (
+      <div className="desktop-cart-line">
+        <div className="desktop-cart-line-image">
+          {image && (
+            <Image
+              alt={title}
+              aspectRatio="1/1"
+              data={image}
+              height={100}
+              loading="lazy"
+              width={100}
+            />
+          )}
+        </div>
+
+        <div className="desktop-cart-line-details">
+          <h3 className="desktop-cart-line-title">
+            <Link to={lineItemUrl}>{product.title}</Link>
+          </h3>
+          {selectedOptions.length > 0 && (
+            <p className="desktop-cart-line-variant">
+              {selectedOptions.map((option) => `${option.name}: ${option.value}`).join(', ')}
+            </p>
+          )}
+        </div>
+
+        <div className="desktop-cart-line-price">
+          <ProductPrice price={line?.cost?.totalAmount} />
+          {line?.cost?.compareAtAmount && (
+            <div className="compare-price">
+              <ProductPrice price={line?.cost?.compareAtAmount} />
+            </div>
+          )}
+        </div>
+
+        <div className="desktop-cart-line-actions">
+          <DesktopCartLineQuantity line={line} />
+          <CartLineRemoveButton lineIds={[id]} disabled={!!(line as any).isOptimistic} />
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile/Aside layout (existing code)
   return (
     <li 
       key={id} 
@@ -245,4 +291,45 @@ function CartLineUpdateButton({
  */
 function getUpdateKey(lineIds: string[]) {
   return [CartForm.ACTIONS.LinesUpdate, ...lineIds].join('-');
+}
+
+/**
+ * Desktop-specific quantity controls
+ */
+function DesktopCartLineQuantity({line}: {line: CartLine}) {
+  if (!line || typeof line?.quantity === 'undefined') return null;
+  const {id: lineId, quantity} = line;
+  const isOptimistic = (line as any).isOptimistic;
+  const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
+  const nextQuantity = Number((quantity + 1).toFixed(0));
+
+  return (
+    <div className="desktop-quantity-controls">
+      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+        <button
+          aria-label="Decrease quantity"
+          disabled={quantity <= 1 || !!isOptimistic}
+          name="decrease-quantity"
+          value={prevQuantity}
+          className="desktop-quantity-btn decrease"
+        >
+          <span>−</span>
+        </button>
+      </CartLineUpdateButton>
+      
+      <span className="desktop-quantity-display">{quantity}</span>
+      
+      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+        <button
+          aria-label="Increase quantity"
+          name="increase-quantity"
+          value={nextQuantity}
+          disabled={!!isOptimistic}
+          className="desktop-quantity-btn increase"
+        >
+          <span>+</span>
+        </button>
+      </CartLineUpdateButton>
+    </div>
+  );
 }

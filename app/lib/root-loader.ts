@@ -1,9 +1,8 @@
-import { useRouteLoaderData } from 'react-router-dom';
-import type { SerializeFrom } from '@shopify/remix-oxygen';
+import { useRouteLoaderData } from 'react-router';
 import type { RootLoader } from '~/root';
 
 export function useRootLoaderData() {
-  const data = useRouteLoaderData('root') as SerializeFrom<RootLoader>;
+  const data = useRouteLoaderData<RootLoader>('root');
   if (!data) {
     throw new Error('No root loader data found');
   }

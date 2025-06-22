@@ -2,7 +2,7 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useRef, useState} from 'react';
-import { FetcherWithComponents, Form } from 'react-router-dom';
+import { FetcherWithComponents, Form } from 'react-router';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -12,6 +12,53 @@ type CartSummaryProps = {
 export function CartSummary({cart, layout}: CartSummaryProps) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
+
+  // Desktop layout
+  if (layout === 'desktop') {
+    return (
+      <div className="desktop-cart-summary">
+        <h3 className="desktop-summary-title">Order Summary</h3>
+        
+        <div className="desktop-summary-details">
+          <div className="desktop-summary-row">
+            <span>Subtotal</span>
+            <span>
+              {cart.cost?.subtotalAmount?.amount ? (
+                <Money data={cart.cost?.subtotalAmount} />
+              ) : (
+                '-'
+              )}
+            </span>
+          </div>
+
+          <DesktopCartDiscounts discountCodes={cart.discountCodes} />
+          <DesktopCartGiftCard giftCardCodes={cart.appliedGiftCards} />
+          
+          {cart.cost?.totalTaxAmount?.amount && (
+            <div className="desktop-summary-row">
+              <span>Tax</span>
+              <span>
+                <Money data={cart.cost.totalTaxAmount} />
+              </span>
+            </div>
+          )}
+
+          <div className="desktop-summary-row total">
+            <span>Total</span>
+            <span>
+              {cart.cost?.totalAmount?.amount ? (
+                <Money data={cart.cost.totalAmount} />
+              ) : (
+                '-'
+              )}
+            </span>
+          </div>
+        </div>
+
+        <DesktopCartCheckoutActions checkoutUrl={cart.checkoutUrl} />
+      </div>
+    );
+  }
 
   // Calculate progress for free shipping
   const subtotal = parseFloat(cart.cost?.subtotalAmount?.amount || '0');
@@ -150,6 +197,40 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
   );
 }
 
+function DesktopCartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  if (!checkoutUrl) return null;
+
+  const handleCheckout = () => {
+    setIsProcessing(true);
+    // Simulate processing
+    setTimeout(() => {
+      window.location.href = checkoutUrl;
+    }, 500);
+  };
+
+  return (
+    <button 
+      className="desktop-checkout-btn"
+      onClick={handleCheckout}
+      disabled={isProcessing}
+    >
+      {isProcessing ? (
+        <>
+          <div className="spinner"></div>
+          Processing...
+        </>
+      ) : (
+        <>
+          Proceed to Checkout
+          <span>→</span>
+        </>
+      )}
+    </button>
+  );
+}
+
 function CartDiscounts({
   discountCodes,
 }: {
@@ -208,6 +289,26 @@ function UpdateDiscountForm({
     >
       {children}
     </CartForm>
+  );
+}
+
+function DesktopCartDiscounts({
+  discountCodes,
+}: {
+  discountCodes?: CartApiQueryFragment['discountCodes'];
+}) {
+  const codes: string[] =
+    discountCodes
+      ?.filter((discount) => discount.applicable)
+      ?.map(({code}) => code) || [];
+
+  if (codes.length === 0) return null;
+
+  return (
+    <div className="desktop-summary-row">
+      <span>Discount</span>
+      <span>-{codes.join(', ')}</span>
+    </div>
   );
 }
 
@@ -298,5 +399,22 @@ function UpdateGiftCardForm({
         return children;
       }}
     </CartForm>
+  );
+}
+
+function DesktopCartGiftCard({
+  giftCardCodes,
+}: {
+  giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
+}) {
+  const codes: string[] = giftCardCodes?.map(({code}) => code) || [];
+
+  if (codes.length === 0) return null;
+
+  return (
+    <div className="desktop-summary-row">
+      <span>Gift Card</span>
+      <span>-{codes.join(', ')}</span>
+    </div>
   );
 }
