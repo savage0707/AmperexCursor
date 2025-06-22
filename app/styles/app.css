@@ -165,8 +165,8 @@ button.reset:hover:not(:has(> *)) {
 .header {
   background-color: #004c97;
   color: #fff;
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 1rem 5%;
   gap: 20px;
@@ -190,8 +190,11 @@ button.reset:hover:not(:has(> *)) {
 }
 
 .header-search-form {
-  position: relative;
-  width: 100%;
+  display: none; /* Hidden by default on mobile */
+}
+
+.header-menu-mobile-toggle {
+  display: block; /* Visible by default on mobile */
 }
 
 .header-search-form input {
@@ -2351,5 +2354,20 @@ button.reset:hover:not(:has(> *)) {
   
   .security-icons {
     justify-content: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .header {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+  }
+
+  .header-search-form {
+    display: block; /* Visible on desktop */
+  }
+  
+  .header-menu-mobile-toggle {
+    display: none; /* Hidden on desktop */
   }
 }
